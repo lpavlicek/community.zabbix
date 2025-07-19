@@ -23,10 +23,13 @@
 
 - name: Load Appropriate Defaults
   ansible.builtin.include_vars: "{{ zabbix_agent2 | ternary('agent2', 'agent') }}_vars.yml"
+  tags:
+    - always
 
 - when: zabbix_agent_tlspsk_auto | bool
   tags:
     - config
+    - api
   block:
     - name: AutoPSK | Default tlsconnect to enforce PSK
       ansible.builtin.set_fact:
@@ -55,6 +58,8 @@
     - zabbix_manage_repo | default(true)
     - not (zabbix_agent_docker | bool)
     - ansible_facts['os_family'] not in ['Alpine', 'Darwin', 'Windows']
+  tags:
+    - install
 
 - name: "Install the agent"
   when: not (zabbix_agent_docker | bool)
@@ -64,6 +69,8 @@
     - "install.yml"
   loop_control:
     loop_var: _install_tasks_file
+  tags:
+    - install
 
 - name: "Configure Agent"
   when: ansible_facts['os_family'] not in ['Darwin']
@@ -73,6 +80,9 @@
     - "configure{% if zabbix_agent_docker %}-Docker{% endif %}.yml"
   loop_control:
     loop_var: _configure_tasks_file
+  tags:
+    - config
+    - service
 
 - name: "Run the API calls to Zabbix Server"
   vars:
