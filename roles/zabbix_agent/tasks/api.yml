@@ -32,8 +32,21 @@
         zabbix_agent_ip: "{{ ansible_facts['all_ipv4_addresses'] | ansible.utils.ipaddr('public') | first }}"
       when: ansible_facts['all_ipv4_addresses'] | ansible.utils.ipaddr('public') | length > 0
 
-
 - name: "API | Create host groups"
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_use_ssl: "{{ zabbix_api_use_ssl }}"
+    # --- Basic Auth (Begin) ---
+    http_login_user: "{{ zabbix_api_http_user | default(-42) }}"
+    http_login_password: "{{ zabbix_api_http_password | default(-42) }}"
+    # --- Basic Auth (End) ---
+    ansible_user: "{{ zabbix_api_login_user | default(omit) }}"
+    ansible_httpapi_pass: "{{ zabbix_api_login_pass | default(omit) }}"
+    ansible_httpapi_port: "{{ zabbix_api_server_port }}"
+    ansible_httpapi_validate_certs: "{{ zabbix_api_validate_certs }}"
+    ansible_zabbix_auth_key: "{{ zabbix_auth_key | default(omit) }}"
+    ansible_host: "{{ zabbix_api_server_host }}"
   community.zabbix.zabbix_group:
     host_groups: "{{ zabbix_host_groups }}"
     state: present
@@ -42,12 +55,25 @@
   register: zabbix_api_hostgroup_created
   until: zabbix_api_hostgroup_created is succeeded
   retries: 10
-  delegate_to: "{{ zabbix_api_server_host }}"
   become: false
   tags:
     - api
 
 - name: "API | Create a new host or update an existing host's info"
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_use_ssl: "{{ zabbix_api_use_ssl }}"
+    # --- Basic Auth (Begin) ---
+    http_login_user: "{{ zabbix_api_http_user | default(-42) }}"
+    http_login_password: "{{ zabbix_api_http_password | default(-42) }}"
+    # --- Basic Auth (End) ---
+    ansible_user: "{{ zabbix_api_login_user | default(omit) }}"
+    ansible_httpapi_pass: "{{ zabbix_api_login_pass | default(omit) }}"
+    ansible_httpapi_port: "{{ zabbix_api_server_port }}"
+    ansible_httpapi_validate_certs: "{{ zabbix_api_validate_certs }}"
+    ansible_zabbix_auth_key: "{{ zabbix_auth_key | default(omit) }}"
+    ansible_host: "{{ zabbix_api_server_host }}"
   community.zabbix.zabbix_host:
     host_name: "{{ zabbix_agent_hostname }}"
     status: "{{ zabbix_host_status }}"
@@ -74,16 +100,31 @@
     tls_subject: "{{ zabbix_agent_tls_subject | default(omit) }}"
     tags: "{{ zabbix_agent_tags | default(omit) }}"
     visible_name: "{{ zabbix_agent_visible_hostname | default(zabbix_agent_hostname) }}"
+  when:
+    - zabbix_api_create_hosts | bool
   register: zabbix_api_host_created
   until: zabbix_api_host_created is succeeded
   retries: 10
-  delegate_to: "{{ zabbix_api_server_host }}"
   become: false
   changed_when: false
   tags:
     - api
 
 - name: "API | Updating host configuration with macros"
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_use_ssl: "{{ zabbix_api_use_ssl }}"
+    # --- Basic Auth (Begin) ---
+    http_login_user: "{{ zabbix_api_http_user | default(-42) }}"
+    http_login_password: "{{ zabbix_api_http_password | default(-42) }}"
+    # --- Basic Auth (End) ---
+    ansible_user: "{{ zabbix_api_login_user | default(omit) }}"
+    ansible_httpapi_pass: "{{ zabbix_api_login_pass | default(omit) }}"
+    ansible_httpapi_port: "{{ zabbix_api_server_port }}"
+    ansible_httpapi_validate_certs: "{{ zabbix_api_validate_certs }}"
+    ansible_zabbix_auth_key: "{{ zabbix_auth_key | default(omit) }}"
+    ansible_host: "{{ zabbix_api_server_host }}"
   community.zabbix.zabbix_hostmacro:
     host_name: "{{ zabbix_agent_hostname }}"
     macro_name: "{{ item.macro_key }}"
@@ -96,7 +137,6 @@
   until: zabbix_api_hostmarcro_created is succeeded
   retries: 10
   no_log: "{{ ansible_verbosity < 3 }}"
-  delegate_to: "{{ zabbix_api_server_host }}"
   become: false
   tags:
     - api
