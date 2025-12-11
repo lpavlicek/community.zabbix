@@ -99,7 +99,7 @@ See the following list of supported Operating systems with the Zabbix releases:
 | Debian 11 bullseye  |  V  |  V  |  V  |  V  |
 | Suse Fam 15         |  V  |  V  |  V  |  V  |
 
-You can bypass this matrix by setting `enable_version_check: false`
+You can bypass this matrix by setting `zabbix_agent_version_check: false`
 
 # Role Variables
 
@@ -172,7 +172,7 @@ Selinux changes will be installed based on the status of selinux running on the 
 * `zabbix_agent_tls_subject`:  The subject of the TLS certificate.
 * `zabbix_agent_visible_hostname` : Configure Zabbix visible name inside Zabbix web UI for the node.
 
-The results are stored in the Ansible variables `zabbix_agent_tlspskidentity` and `zabbix_agent_tlspsk_secret`, so that they may be used later in the code, for example with [zabbix_host](https://docs.ansible.com/ansible/latest/collections/community/zabbix/zabbix_host_module.html) to configure the Zabbix server or with `debug: msg:` to display them to the user.
+The results are stored in the Ansible variables `zabbix_agent_tlspskidentity` and `zabbix_agent_tlspsk_secret`, so that they may be used later in the code, for example with [zabbix_host](https://docs.ansible.com/projects/ansible/latest/collections/community/zabbix/zabbix_host_module.html) to configure the Zabbix server or with `debug: msg:` to display them to the user.
 
 ## Zabbix API variables
 
@@ -186,7 +186,7 @@ Host encryption configuration will be set to match agent configuration.
 * `zabbix_agent_interfaces`: A list of interfaces and their configurations you can use when configuring via API.
 * `zabbix_agent_inventory_mode`: Configure Zabbix inventory mode. Needed for building inventory data, manually when configuring a host or automatically by using some automatic population options. This has to be set to `automatic` if you want to make automatically building inventory data.  Default `disabled`
 * `zabbix_agent_inventory_zabbix`: Adds Facts for a zabbix inventory.  Default `{}`
-* `zabbix_agent_ip`: The IP address of the host. When not provided, it will be determined via the `ansible_default_ipv4` fact.
+* `zabbix_agent_ip`: The IP address of the host. When not provided, it will be determined via the `ansible_default_ipv4` fact, with a fallback to the first available IP address.
 * `zabbix_agent_link_templates`: A list of templates which needs to be link to this host. The templates should exist.  Default:  "Templated Linux by Zabbix agent"
 * `zabbix_agent_macros`: A list with macro_key and macro_value for creating hostmacro's.
 * `zabbix_agent_monitored_by`: How the agent is monitored.  Choices are 'zabbix_server', 'proxy', and 'proxy_group'.  (Zabbix 7.0 or greater)
